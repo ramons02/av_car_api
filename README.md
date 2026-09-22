@@ -29,6 +29,52 @@ mvnw clean install
 
 O artefato `br.edu.senai.fatesg:av-car:1.0.0` é instalado no repositório local e consumido pela `av_car_app`.
 
+## Como executar a aplicação
+
+> O backend é uma **biblioteca**: quem executa tudo (Swing + API REST) é a `av_car_app`. O `av_car_api` precisa apenas ser compilado/instalado antes.
+
+### Pré-requisitos
+
+* **JDK 21** obrigatório (JDK 25 quebra a compilação do Lombok). No Windows: `set JAVA_HOME=C:\Program Files\Java\jdk-21`
+* **Maven Wrapper**: no Windows use `mvnw.cmd` em vez de `mvnw` nos comandos abaixo.
+* **PostgreSQL** rodando com o banco `avcar` criado.
+* Arquivo **`av_car_infra/.env`** com as credenciais do banco (ou variáveis de ambiente reais — sempre têm prioridade).
+
+### Passo a passo
+
+**1. Preparar o banco** — o sistema não cria tabelas automaticamente. Execute em ordem no banco `avcar`:
+
+```bash
+# a partir de av_car_api/
+psql -U postgres -h localhost -d avcar -f db/schema.sql
+psql -U postgres -h localhost -d avcar -f db/seed.sql
+```
+
+**2. Compilar e instalar o backend**
+
+```bash
+# av_car_api/
+mvnw clean install
+```
+
+**3. Compilar o frontend**
+
+```bash
+# av_car_app/
+mvnw clean package
+```
+
+Gera o executável `target/av-car-app-1.0.0.jar`.
+
+**4. Executar a aplicação** — rode **a partir da pasta `av_car_app`** (o `springdotenv` localiza o `.env` por caminho relativo `../av_car_infra`):
+
+```bash
+# av_car_app/
+java -jar target/av-car-app-1.0.0.jar
+```
+
+Ao iniciar: abre a **janela Swing** (tema FlatLaf) e a **API REST** fica disponível em `http://localhost:8080` (Swagger em `http://localhost:8080/swagger-ui/index.html`).
+
 ## Banco de Dados
 
 O sistema **não** cria tabelas automaticamente. Configure o banco `avcar` no PostgreSQL e execute na ordem:
