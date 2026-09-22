@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface IOrdemServicoService extends IGenericService<OrdemServicoDTO> {
     List<OrdemServicoDTO> buscarPorStatus(String status);
+    DashboardDTO obterResumoDashboard();
 }

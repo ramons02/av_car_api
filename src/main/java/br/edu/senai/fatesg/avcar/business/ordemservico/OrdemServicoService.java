@@ -27,17 +27,20 @@ public class OrdemServicoService {
     private final IServicoRepository servicoRepository;
     private final IPecaRepository pecaRepository;
     private final IFornecedorRepository fornecedorRepository;
+    private final br.edu.senai.fatesg.avcar.business.parceiros.IParceiroRepository parceiroRepository;
 
     public OrdemServicoService(IOrdemServicoRepository repository,
                                IVeiculoRepository veiculoRepository,
                                IServicoRepository servicoRepository,
                                IPecaRepository pecaRepository,
-                               IFornecedorRepository fornecedorRepository) {
+                               IFornecedorRepository fornecedorRepository,
+                               br.edu.senai.fatesg.avcar.business.parceiros.IParceiroRepository parceiroRepository) {
         this.repository = repository;
         this.veiculoRepository = veiculoRepository;
         this.servicoRepository = servicoRepository;
         this.pecaRepository = pecaRepository;
         this.fornecedorRepository = fornecedorRepository;
+        this.parceiroRepository = parceiroRepository;
     }
 
     public List<OrdemServicoDTO> listarTodos() {
@@ -85,6 +88,17 @@ public class OrdemServicoService {
         if (os.getValorTotal() <= 0) {
             throw new NegocioException("Valor total da OS deve ser positivo");
         }
+        double servicos = repository.listarItensServico(id).stream().mapToDouble(s -> s.getQuantidade() * s.getValorUnitario()).sum();
+        double pecas = repository.listarItensPeca(id).stream().mapToDouble(p -> p.getQuantidade() * p.getValorUnitario()).sum();
+        double externos = repository.listarServicosExternos(id).stream().mapToDouble(br.edu.senai.fatesg.avcar.business.servicos.ServicoExterno::getValor).sum();
+        
+        os.setValorMaoObra(servicos);
+        os.setValorTotalPecas(pecas);
+        os.setValorServicoExterno(externos);
+        
+        double novoTotal = (servicos + pecas + externos) - os.getValorDesconto();
+        os.setValorTotal(novoTotal);
+
         os.setStatus(StatusOrdemServico.FINALIZADA);
         os.setDataFinalizacao(LocalDateTime.now());
         repository.atualizar(os);
@@ -123,9 +137,8 @@ public class OrdemServicoService {
         return OrdemServicoDTO.from(os);
     }
 
-    public OrdemServicoDTO aplicarDesconto(Long id, double percentual) {
+    public OrdemServicoDTO aplicarDesconto(Long id, double valorDesconto) {
         OrdemServico os = carregar(id);
-        double valorDesconto = os.getValorTotal() * (percentual / 100);
         os.setValorDesconto(valorDesconto);
         repository.atualizar(os);
         return OrdemServicoDTO.from(os);
@@ -136,12 +149,40 @@ public class OrdemServicoService {
             .map(OrdemServicoDTO::from).toList();
     }
 
+    public DashboardDTO obterResumoDashboard() {
+        java.util.List<OrdemServicoDTO> ordens = this.listarTodos();
+        int totalOS = 0;
+        int osAbertas = 0;
+        double faturamentoTotal = 0.0;
+        double descontosTotal = 0.0;
+        
+        if (ordens != null) {
+            totalOS = ordens.size();
+            for (OrdemServicoDTO os : ordens) {
+                if (os.getStatus() != null) {
+                    String statusStr = os.getStatus().toUpperCase();
+                    if (statusStr.equals("ABERTA") || statusStr.equals("EM_ORCAMENTO") || statusStr.equals("EM ORÇAMENTO") ||
+                        statusStr.equals("EM_EXECUCAO") || statusStr.equals("EM EXECUÇÃO") || 
+                        statusStr.equals("AGUARDANDO_PECA") || statusStr.equals("AGUARDANDO PEÇA") ||
+                        statusStr.equals("EM_ANDAMENTO") || statusStr.equals("EM ANDAMENTO")) {
+                        osAbertas++;
+                    } else if (statusStr.equals("FINALIZADA") || statusStr.equals("FINALIZADO") || statusStr.equals("PAGA")) {
+                        double somaBruta = os.getValorMaoObra() + os.getValorTotalPecas() + os.getValorServicoExterno();
+                        faturamentoTotal += (somaBruta - os.getValorDesconto());
+                        descontosTotal += os.getValorDesconto();
+                    }
+                }
+            }
+        }
+        return new DashboardDTO(totalOS, osAbertas, faturamentoTotal, descontosTotal);
+    }
+
     private OrdemServico carregar(Long id) {
         return repository.buscarPorId(id)
             .orElseThrow(() -> new EntidadeNaoEncontradaException("Ordem de Serviço", id));
     }
 
-    public OrdemServicoDTO criar(Long veiculoId,
+    public OrdemServicoDTO criar(Long veiculoId, Long responsavelId,
                                   String entradaVeiculo, String defeitoRelatado,
                                   String formaPagamento) {
         var veiculoModel = veiculoRepository.buscarPorId(veiculoId)
@@ -150,6 +191,7 @@ public class OrdemServicoService {
         br.edu.senai.fatesg.avcar.business.veiculos.Veiculo veiculo = toVeiculoDomain(veiculoModel);
         OrdemServico os = new OrdemServico();
         os.setVeiculo(veiculo);
+        os.setColaboradorId(responsavelId);
         if (entradaVeiculo != null && !entradaVeiculo.isBlank())
             os.setEntradaVeiculo(LocalDate.parse(entradaVeiculo));
         os.setDefeitoRelatado(defeitoRelatado);
@@ -212,11 +254,11 @@ public class OrdemServicoService {
         return repository.listarItensPeca(osId).stream().map(ItemPecaDTO::from).toList();
     }
 
-    public ServicoExternoDTO adicionarServicoExterno(Long osId, Long fornecedorId, String descricao, double valor, int garantiaDias) {
+    public ServicoExternoDTO adicionarServicoExterno(Long osId, Long parceiroId, String descricao, double valor, int garantiaDias) {
         carregar(osId);
-        fornecedorRepository.buscarPorId(fornecedorId)
-            .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor", fornecedorId));
-        var se = repository.adicionarServicoExterno(osId, fornecedorId, descricao, valor, garantiaDias);
+        parceiroRepository.buscarPorId(parceiroId)
+            .orElseThrow(() -> new EntidadeNaoEncontradaException("Parceiro Externo", parceiroId));
+        var se = repository.adicionarServicoExterno(osId, parceiroId, descricao, valor, garantiaDias);
         return ServicoExternoDTO.from(se);
     }
 
@@ -237,7 +279,7 @@ public class OrdemServicoService {
 
     public List<GarantiaDTO> calcularGarantia(Long id) {
         OrdemServico os = carregar(id);
-        LocalDate dataFim = os.getDataFinalizacao() != null ? os.getDataFinalizacao().toLocalDate() : null;
+        java.time.LocalDateTime dataFim = os.getDataFinalizacao();
         List<GarantiaDTO> lista = new ArrayList<>();
 
         for (var item : repository.listarItensServico(id)) {
@@ -252,7 +294,9 @@ public class OrdemServicoService {
             lista.add(new GarantiaDTO("Peça", item.getPeca().getNome(), dataFim, prazo));
         }
         for (var item : repository.listarServicosExternos(id)) {
-            lista.add(new GarantiaDTO("Serv. Externo", item.getDescricao(), dataFim, item.getGarantiaDias()));
+            String nomeParceiro = item.getParceiro() != null && item.getParceiro().getNome() != null ? 
+                                  item.getParceiro().getNome() : "Parceiro Externo";
+            lista.add(new GarantiaDTO("Serv. Externo", item.getDescricao(), dataFim, item.getGarantiaDias(), "Parceiro: " + nomeParceiro));
         }
         return lista;
     }

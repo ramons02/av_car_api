@@ -28,7 +28,7 @@ public class OrdemServicoDTO extends BaseDTO {
     // Campos legados (compatibilidade com OrdemServicoService existente)
     private Integer numeroOs;
     private String veiculo;
-    private LocalDate dataAberturaLegado;
+
     private LocalDateTime dataFinalizacao;
     private LocalDate entradaVeiculo;
     private String defeitoRelatado;
@@ -49,7 +49,7 @@ public class OrdemServicoDTO extends BaseDTO {
         dto.setNumeroOs(os.getNumeroOs());
         dto.setVeiculo(os.getVeiculo().getPlaca() + " - " + os.getVeiculo().getModelo().getNomeModelo());
         dto.setStatus(os.getStatus().getDescricao());
-        dto.setDataAberturaLegado(os.getDataAbertura());
+        dto.setDataAbertura(os.getDataAbertura());
         dto.setDataFinalizacao(os.getDataFinalizacao());
         dto.setEntradaVeiculo(os.getEntradaVeiculo());
         dto.setDefeitoRelatado(os.getDefeitoRelatado());

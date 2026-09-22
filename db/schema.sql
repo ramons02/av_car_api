@@ -40,7 +40,7 @@ CREATE TABLE pessoa (
 
 CREATE TABLE pessoafisica (
     idpessoafisica SERIAL PRIMARY KEY,
-    cpf VARCHAR(14),
+    cpf VARCHAR(14) NOT NULL UNIQUE,
     rg VARCHAR(20),
     datanascimento DATE,
     idpessoa INTEGER NOT NULL REFERENCES pessoa(idpessoa)
@@ -48,9 +48,9 @@ CREATE TABLE pessoafisica (
 
 CREATE TABLE pessoajuridica (
     idpessoajuridica SERIAL PRIMARY KEY,
-    cnpj VARCHAR(18),
+    cnpj VARCHAR(18) NOT NULL UNIQUE,
     inscricaoestadual VARCHAR(20),
-    razaosocial VARCHAR(255),
+    razaosocial VARCHAR(255) NOT NULL,
     idpessoa INTEGER NOT NULL REFERENCES pessoa(idpessoa)
 );
 
@@ -65,7 +65,7 @@ CREATE TABLE cliente (
 CREATE TABLE colaborador (
     idcolaborador SERIAL PRIMARY KEY,
     matricula VARCHAR(20) NOT NULL UNIQUE,
-    cpf VARCHAR(14) NOT NULL,
+    cpf VARCHAR(14) NOT NULL UNIQUE,
     dataadmissao DATE,
     datademissao DATE,
     salario DECIMAL(10,2),
@@ -102,10 +102,10 @@ CREATE TABLE modelo (
 CREATE TABLE veiculo (
     idveiculo SERIAL PRIMARY KEY,
     placa VARCHAR(10) NOT NULL UNIQUE,
-    chassi VARCHAR(20),
+    chassi VARCHAR(20) NOT NULL,
     anofabricacao INTEGER NOT NULL,
     anomodelo INTEGER NOT NULL,
-    cor VARCHAR(30),
+    cor VARCHAR(30) NOT NULL,
     quilometragem INTEGER NOT NULL DEFAULT 0,
     acessorios TEXT,
     idmodelo INTEGER NOT NULL REFERENCES modelo(idmodelo),
@@ -114,11 +114,11 @@ CREATE TABLE veiculo (
 
 CREATE TABLE ordemservico (
     idordemservico SERIAL PRIMARY KEY,
-    numeroos INTEGER,
-    entradaveiculo DATE,
-    dataabertura DATE NOT NULL DEFAULT CURRENT_DATE,
+    numeroos INTEGER UNIQUE,
+    entradaveiculo DATE NOT NULL,
+    dataabertura TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     datafechamento TIMESTAMP,
-    defeitorelatado TEXT,
+    defeitorelatado TEXT NOT NULL,
     quantidadepecas INTEGER DEFAULT 0,
     valortotalpecas DECIMAL(10,2) DEFAULT 0,
     valormaodeobra DECIMAL(10,2) DEFAULT 0,
@@ -134,8 +134,8 @@ CREATE TABLE ordemservico (
 
 CREATE TABLE pecas (
     idpecas SERIAL PRIMARY KEY,
-    codigonacional BIGINT,
-    codigointernopeca VARCHAR(50),
+    codigonacional BIGINT UNIQUE,
+    codigointernopeca VARCHAR(50) UNIQUE,
     nomepeca VARCHAR(200) NOT NULL,
     descricaopeca TEXT,
     fabricantepeca VARCHAR(200),
@@ -150,8 +150,8 @@ CREATE TABLE pecas (
 
 CREATE TABLE fornecedor (
     idfornecedor SERIAL PRIMARY KEY,
-    razaosocial VARCHAR(200),
-    cnpj VARCHAR(18) NOT NULL,
+    razaosocial VARCHAR(200) NOT NULL,
+    cnpj VARCHAR(18) NOT NULL UNIQUE,
     ddi VARCHAR(10) DEFAULT '55',
     ddd VARCHAR(10) DEFAULT '',
     numerofornecedor VARCHAR(20),
@@ -160,7 +160,8 @@ CREATE TABLE fornecedor (
     bairrofornecedor VARCHAR(100),
     cidadefornecedor VARCHAR(100),
     estadofornecedor VARCHAR(50),
-    cepfornecedor INTEGER
+    cepfornecedor INTEGER,
+    ativo BOOLEAN DEFAULT true
 );
 
 CREATE TABLE fornecedor_pecas (
@@ -203,13 +204,23 @@ CREATE TABLE itempecas (
     idordemservico INTEGER NOT NULL REFERENCES ordemservico(idordemservico)
 );
 
+CREATE TABLE parceiro_externo (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,
+    cnpj VARCHAR(18) NOT NULL UNIQUE,
+    tipo_servico VARCHAR(100),
+    telefone VARCHAR(20),
+    email VARCHAR(255),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE
+);
+
 CREATE TABLE servicoexterno (
     idservicoexterno SERIAL PRIMARY KEY,
-    descricao TEXT,
+    descricao TEXT NOT NULL,
     valor DECIMAL(10,2) NOT NULL,
     prazo DATE DEFAULT CURRENT_DATE,
     garantiadias INTEGER NOT NULL DEFAULT 90,
-    idfornecedor INTEGER NOT NULL REFERENCES fornecedor(idfornecedor)
+    idparceiro INTEGER NOT NULL REFERENCES parceiro_externo(id)
 );
 
 CREATE TABLE itensservicoexterno (
@@ -228,14 +239,4 @@ CREATE TABLE historicocliente (
     datainicio DATE NOT NULL DEFAULT CURRENT_DATE,
     datafim DATE,
     PRIMARY KEY (idveiculo, idcliente, datainicio)
-);
-
-CREATE TABLE parceiro_externo (
-    id SERIAL PRIMARY KEY,
-    nome VARCHAR(200) NOT NULL,
-    cnpj VARCHAR(18) NOT NULL UNIQUE,
-    tipo_servico VARCHAR(100),
-    telefone VARCHAR(20),
-    email VARCHAR(255),
-    ativo BOOLEAN NOT NULL DEFAULT TRUE
 );

@@ -3,14 +3,29 @@ package br.edu.senai.fatesg.avcar.datastructures;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * <b>Estrutura de Dados: Algoritmos de Ordenação</b>
+ * <p>
+ * Implementação manual de algoritmos de ordenação baseados em "Dividir e Conquistar",
+ * sem uso de coleções nativas de sort do Java, conforme exigência do projeto.
+ * </p>
+ */
 public class OrdenacaoOS {
 
     private OrdenacaoOS() {}
 
-    // ---------------------------------------------------------------
-    // MERGE SORT  — O(n log n) garantido, estável
-    // ---------------------------------------------------------------
-
+    /**
+     * <b>Merge Sort</b>
+     * <p>
+     * Divide a lista repetidamente na metade até ter elementos individuais e 
+     * depois as combina de volta na ordem correta.
+     * </p>
+     * <p><b>Complexidade:</b> O(n log n) garantido em todos os casos.</p>
+     * <p><b>Estabilidade:</b> É um algoritmo estável (mantém a ordem relativa de elementos de mesmo valor), excelente para relatórios.</p>
+     * 
+     * @param lista A lista genérica a ser ordenada
+     * @param comparator O comparador para definir a regra de ordenação
+     */
     public static <T> void mergeSort(List<T> lista, Comparator<T> comparator) {
         if (lista == null || lista.size() <= 1) return;
         mergeSortRecursivo(lista, 0, lista.size() - 1, comparator);
@@ -51,10 +66,18 @@ public class OrdenacaoOS {
         while (j < n2) lista.set(k++, (T) rightArr[j++]);
     }
 
-    // ---------------------------------------------------------------
-    // QUICK SORT  — O(n log n) médio / O(n²) pior caso, instável
-    // ---------------------------------------------------------------
-
+    /**
+     * <b>Quick Sort</b>
+     * <p>
+     * Escolhe um elemento 'pivô' e particiona a lista de modo que elementos menores
+     * fiquem à esquerda e os maiores à direita, ordenando recursivamente as partições.
+     * </p>
+     * <p><b>Complexidade:</b> O(n log n) médio. Pior caso: O(n²) se a lista já estiver ordenada.</p>
+     * <p><b>Estabilidade:</b> Instável.</p>
+     * 
+     * @param lista A lista genérica a ser ordenada
+     * @param comparator O comparador para definir a regra de ordenação
+     */
     public static <T> void quickSort(List<T> lista, Comparator<T> comparator) {
         if (lista == null || lista.size() <= 1) return;
         quickSortRecursivo(lista, 0, lista.size() - 1, comparator);

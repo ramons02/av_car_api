@@ -4,6 +4,19 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>Estrutura de Dados: Fila (Queue) - FIFO</b>
+ * <p>
+ * <b>Conceito:</b> Uma fila operando no princípio First In, First Out (Primeiro a Entrar, Primeiro a Sair).
+ * Usada para gerenciar os veículos/OS aguardando atendimento na oficina de forma justa.
+ * </p>
+ * <p>
+ * <b>Complexidade de Tempo:</b> O(1) para inserção (enqueue) e remoção (dequeue) 
+ * graças à implementação de Fila Circular com Array.
+ * </p>
+ *
+ * @param <T> O tipo de objeto armazenado na fila (Genérico)
+ */
 public class FilaEsperaOS<T> {
 
     private Object[] elementos;
@@ -19,6 +32,12 @@ public class FilaEsperaOS<T> {
         this.tamanho = 0;
     }
 
+    /**
+     * Adiciona um item no final da fila (Rear).
+     * <p>Complexidade: O(1) amortizado, pois o redimensionamento só ocorre quando cheio.</p>
+     * 
+     * @param item o item a ser enfileirado
+     */
     public void enqueue(T item) {
         if (isFull()) {
             crescer();
@@ -28,6 +47,13 @@ public class FilaEsperaOS<T> {
         tamanho++;
     }
 
+    /**
+     * Remove e retorna o item que está no início da fila (Front).
+     * <p>Complexidade: O(1) estrito.</p>
+     * 
+     * @return O primeiro item da fila
+     * @throws IllegalStateException se a fila estiver vazia
+     */
     @SuppressWarnings("unchecked")
     public T dequeue() {
         if (isEmpty()) {

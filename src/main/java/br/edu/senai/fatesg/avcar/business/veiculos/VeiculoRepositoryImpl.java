@@ -97,6 +97,13 @@ public class VeiculoRepositoryImpl extends AbstractRepository<VeiculoModel> impl
             return ps;
         }, keyHolder);
         model.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+        
+        // NOVO: Se foi selecionado um cliente, insere na tabela de histórico
+        if (model.getClienteId() != null) {
+            jdbc.update("INSERT INTO historicocliente (idcliente, idveiculo, datainicio) VALUES (?, ?, CURRENT_TIMESTAMP)", 
+                        model.getClienteId(), model.getId());
+        }
+        
         return model;
     }
 
@@ -106,6 +113,26 @@ public class VeiculoRepositoryImpl extends AbstractRepository<VeiculoModel> impl
             "UPDATE veiculo SET placa=?, chassi=?, anofabricacao=?, anomodelo=?, cor=?, quilometragem=?, acessorios=?, idmodelo=? WHERE idveiculo=?",
             model.getPlaca(), model.getChassi(), model.getAnoFabricacao(), model.getAnoModelo(),
             model.getCor(), model.getQuilometragem(), model.getAcessorios(), model.getModeloId(), model.getId());
+            
+        // NOVO: Gerencia a mudança de dono no Histórico do Cliente
+        if (model.getClienteId() != null) {
+            // Verifica quem é o cliente atual ativo
+            java.util.List<Long> donoAtual = jdbc.queryForList(
+                "SELECT idcliente FROM historicocliente WHERE idveiculo = ? AND datafim IS NULL", 
+                Long.class, model.getId());
+                
+            // Se não tem dono, ou o dono atual é diferente do novo dono selecionado
+            if (donoAtual.isEmpty() || !donoAtual.get(0).equals(model.getClienteId())) {
+                // Encerra o vínculo antigo (se existir)
+                jdbc.update("UPDATE historicocliente SET datafim = CURRENT_TIMESTAMP WHERE idveiculo = ? AND datafim IS NULL", model.getId());
+                // Inicia o novo vínculo
+                jdbc.update("INSERT INTO historicocliente (idcliente, idveiculo, datainicio) VALUES (?, ?, CURRENT_TIMESTAMP)", 
+                            model.getClienteId(), model.getId());
+            }
+        } else {
+            // Se desmarcou o cliente, apenas encerra o vínculo atual
+            jdbc.update("UPDATE historicocliente SET datafim = CURRENT_TIMESTAMP WHERE idveiculo = ? AND datafim IS NULL", model.getId());
+        }
     }
 
     @Override

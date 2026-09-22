@@ -34,7 +34,7 @@ public class ColaboradorService extends GenericService<ColaboradorModel, Colabor
     public ColaboradorDTO salvar(ColaboradorModel model) {
         if (model.getDataAdmissao() == null) model.setDataAdmissao(LocalDate.now());
         validation.validar(model);
-        ColaboradorModel salvo = repository.salvar(model);
+        ColaboradorModel salvo = executarComTratamentoDuplicidade(() -> repository.salvar(model));
         if (model.getFuncaoIds() != null && !model.getFuncaoIds().isEmpty()) {
             repository.salvarFuncoes(salvo.getId(), model.getFuncaoIds());
         }
@@ -46,9 +46,16 @@ public class ColaboradorService extends GenericService<ColaboradorModel, Colabor
         ColaboradorModel atual = repository.buscarPorId(model.getId())
             .orElseThrow(() -> new EntidadeNaoEncontradaException("Colaborador", model.getId()));
         model.setIdPessoa(atual.getIdPessoa());
+        if (model.getMatricula() == null) model.setMatricula(atual.getMatricula());
+        if (model.getDataAdmissao() == null) model.setDataAdmissao(atual.getDataAdmissao());
+        if (model.getDataDemissao() == null) model.setDataDemissao(atual.getDataDemissao());
+        if (model.getSalario() == null) model.setSalario(atual.getSalario());
+        if (model.getObservacoes() == null) model.setObservacoes(atual.getObservacoes());
         validation.validar(model);
-        repository.atualizar(model);
-        repository.salvarFuncoes(model.getId(), model.getFuncaoIds());
+        executarComTratamentoDuplicidade(() -> {
+            repository.atualizar(model);
+            repository.salvarFuncoes(model.getId(), model.getFuncaoIds());
+        });
     }
 
     @Override

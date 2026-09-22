@@ -34,6 +34,11 @@ public class OrdemServicoController {
         return ResponseEntity.ok(service.buscarPorStatus(status));
     }
 
+    @GetMapping("/dashboard/resumo")
+    public ResponseEntity<DashboardDTO> obterResumoDashboard() {
+        return ResponseEntity.ok(service.obterResumoDashboard());
+    }
+
     @PostMapping("/{id}/avancar/orcamento")
     public ResponseEntity<OrdemServicoDTO> avancarOrcamento(@PathVariable Long id) {
         return ResponseEntity.ok(service.avancarOrcamento(id));
@@ -82,14 +87,14 @@ public class OrdemServicoController {
 
     @PostMapping("/{id}/desconto")
     public ResponseEntity<OrdemServicoDTO> aplicarDesconto(
-            @PathVariable Long id, @RequestParam double percentual) {
-        return ResponseEntity.ok(service.aplicarDesconto(id, percentual));
+            @PathVariable Long id, @RequestParam double valor) {
+        return ResponseEntity.ok(service.aplicarDesconto(id, valor));
     }
 
     @PostMapping
     public ResponseEntity<OrdemServicoDTO> criar(@RequestBody CriarOSRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(service.criar(req.veiculoId(),
+            .body(service.criar(req.veiculoId(), req.responsavelId(),
                 req.entradaVeiculo(), req.defeitoRelatado(), req.formaPagamento()));
     }
 
@@ -157,7 +162,7 @@ public class OrdemServicoController {
         return ResponseEntity.noContent().build();
     }
 
-    public record CriarOSRequest(Long veiculoId,
+    public record CriarOSRequest(Long veiculoId, Long responsavelId,
                                   String entradaVeiculo, String defeitoRelatado,
                                   String formaPagamento) {}
     public record AtualizarOSRequest(String defeitoRelatado, String formaPagamento) {}

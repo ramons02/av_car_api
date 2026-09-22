@@ -4,10 +4,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-// PADRÃO ITERATOR: Fornece uma maneira de acessar sequencialmente os elementos
-// de um objeto agregado sem expor sua estrutura interna. Aplicado aqui para
-// percorrer ordens de serviço filtrando por status, encapsulando a lógica de
-// navegação e filtro para que o cliente use apenas hasNext() e next().
+// PADRÃO ITERATOR: Permite percorrer uma lista de OrdemServico aplicando automaticamente um 
+// filtro de StatusOrdemServico. Isso encapsula a lógica de navegação e as regras do filtro
+// (loops e if's) dentro do iterador. O cliente que for percorrer a lista só precisa utilizar
+// os métodos simples hasNext() e next().
 public class OrdemServicoIterator implements Iterator<OrdemServico> {
     private final List<OrdemServico> ordens;
     private final StatusOrdemServico filtroStatus;

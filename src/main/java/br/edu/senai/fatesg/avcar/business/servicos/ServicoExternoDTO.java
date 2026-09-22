@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ServicoExternoDTO extends BaseDTO {
-    private Long fornecedorId;
-    private String fornecedorNome;
+    private Long parceiroId;
+    private String parceiroNome;
     private String descricao;
     private double valor;
     private int garantiaDias;
@@ -18,8 +18,8 @@ public class ServicoExternoDTO extends BaseDTO {
     public static ServicoExternoDTO from(ServicoExterno se) {
         ServicoExternoDTO dto = new ServicoExternoDTO();
         dto.setId(se.getId());
-        dto.setFornecedorId(se.getFornecedor().getId());
-        dto.setFornecedorNome(se.getFornecedor().getRazaoSocial());
+        dto.setParceiroId(se.getParceiro().getId());
+        dto.setParceiroNome(se.getParceiro().getNome());
         dto.setDescricao(se.getDescricao());
         dto.setValor(se.getValor());
         dto.setGarantiaDias(se.getGarantiaDias());

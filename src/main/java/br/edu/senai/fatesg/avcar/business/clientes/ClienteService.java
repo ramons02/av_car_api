@@ -32,13 +32,13 @@ public class ClienteService extends GenericService<ClienteModel, ClienteDTO, ICl
     @Override
     public ClienteDTO salvar(ClienteModel model) {
         validation.validar(model);
-        return mapper.toDto(repository.salvar(model));
+        return executarComTratamentoDuplicidade(() -> mapper.toDto(repository.salvar(model)));
     }
 
     @Override
     public void atualizar(ClienteModel model) {
         validation.validar(model);
-        repository.atualizar(model);
+        executarComTratamentoDuplicidade(() -> repository.atualizar(model));
     }
 
     public ClienteDTO atualizarPorRequest(Long id, ClienteController.AtualizarClienteRequest req) {
@@ -68,7 +68,7 @@ public class ClienteService extends GenericService<ClienteModel, ClienteDTO, ICl
         }
 
         validation.validar(atual);
-        repository.atualizar(atual);
+        executarComTratamentoDuplicidade(() -> repository.atualizar(atual));
         return mapper.toDto(repository.buscarPorId(id).orElseThrow());
     }
 }

@@ -27,7 +27,7 @@ public class PecaService extends GenericService<PecaModel, PecaDTO, IPecaReposit
     @Override
     public PecaDTO salvar(PecaModel model) {
         validation.validar(model);
-        return mapper.toDto(repository.salvar(model));
+        return executarComTratamentoDuplicidade(() -> mapper.toDto(repository.salvar(model)));
     }
 
     @Override
@@ -35,7 +35,7 @@ public class PecaService extends GenericService<PecaModel, PecaDTO, IPecaReposit
         repository.buscarPorId(model.getId())
             .orElseThrow(() -> new EntidadeNaoEncontradaException("Peça", model.getId()));
         validation.validar(model);
-        repository.atualizar(model);
+        executarComTratamentoDuplicidade(() -> repository.atualizar(model));
     }
 
     @Override

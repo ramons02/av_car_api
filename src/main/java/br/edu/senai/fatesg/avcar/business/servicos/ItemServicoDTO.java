@@ -16,6 +16,7 @@ public class ItemServicoDTO extends BaseDTO {
     private LocalDateTime horaInicio;
     private LocalDateTime horaFim;
     private String status;
+    private String colaboradorNome;
 
     public ItemServicoDTO() {}
 
@@ -29,6 +30,7 @@ public class ItemServicoDTO extends BaseDTO {
         dto.setHoraInicio(item.getHoraInicio());
         dto.setHoraFim(item.getHoraFim());
         dto.setStatus(item.getStatus());
+        dto.setColaboradorNome(item.getColaboradorNome());
         return dto;
     }
 

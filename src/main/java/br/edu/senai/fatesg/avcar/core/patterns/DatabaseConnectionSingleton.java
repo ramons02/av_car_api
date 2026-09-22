@@ -3,13 +3,16 @@ package br.edu.senai.fatesg.avcar.core.patterns;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-// PADRÃO SINGLETON: Garante que uma classe tenha apenas uma única instância
-// global, com um ponto centralizado de acesso a ela. Aplicado aqui para
-// gerenciar uma única conexão JDBC PostgreSQL reutilizável pelo módulo Swing,
-// evitando múltiplas conexões abertas e potenciais vazamentos de recurso.
+// PADRÃO SINGLETON: Gerencia uma única conexão com o banco de dados JDBC PostgreSQL para
+// ser reaproveitada em todo o cliente Swing. Ao invés de o sistema abrir e fechar conexões
+// repetidas vezes, todos os repositórios requisitam a instância estática central, prevenindo
+// o esgotamento do pool e potenciais vazamentos de conexões.
 public final class DatabaseConnectionSingleton {
 
+    private static final Logger LOGGER = Logger.getLogger(DatabaseConnectionSingleton.class.getName());
     private static DatabaseConnectionSingleton instancia;
     private Connection conexao;
 
@@ -39,7 +42,7 @@ public final class DatabaseConnectionSingleton {
             try {
                 conexao.close();
             } catch (SQLException e) {
-                System.err.println("Erro ao fechar conexão: " + e.getMessage());
+                LOGGER.log(Level.SEVERE, "Erro ao fechar conexão", e);
             }
         }
     }

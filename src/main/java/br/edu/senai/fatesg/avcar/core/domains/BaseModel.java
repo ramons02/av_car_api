@@ -20,6 +20,15 @@ public abstract class BaseModel {
     @Column(name = "ativo")
     private boolean ativo;
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Date getDataHoraCriacao() { return dataHoraCriacao; }
+    public void setDataHoraCriacao(Date dataHoraCriacao) { this.dataHoraCriacao = dataHoraCriacao; }
+
+    public boolean isAtivo() { return ativo; }
+    public void setAtivo(boolean ativo) { this.ativo = ativo; }
+
     @PrePersist
     protected void onCreate() {
         if (this.dataHoraCriacao == null) {

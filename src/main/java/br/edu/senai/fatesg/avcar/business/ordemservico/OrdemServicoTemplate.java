@@ -3,13 +3,16 @@ package br.edu.senai.fatesg.avcar.business.ordemservico;
 import br.edu.senai.fatesg.avcar.core.exceptions.NegocioException;
 
 import java.time.LocalDateTime;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-// PADRÃO TEMPLATE METHOD: Define o esqueleto de um algoritmo em uma operação,
-// postergando alguns passos para subclasses. Aplicado aqui para fixar o fluxo
-// de transição de status de OS (validar → executar → notificar) no método
-// executar(), enquanto subclasses implementam apenas as etapas variáveis
-// (validação e próximo status), eliminando duplicação de código.
+// PADRÃO TEMPLATE METHOD: Define o fluxo rígido de transição do status de uma OrdemServico
+// no método executar(os): primeiro valida, depois executa a transição e por fim notifica.
+// As subclasses implementam apenas os passos mutáveis: como validar as regras específicas
+// de cada etapa e qual é o próximo status, evitando duplicação de código.
 public abstract class OrdemServicoTemplate {
+
+    private static final Logger LOGGER = Logger.getLogger(OrdemServicoTemplate.class.getName());
 
     public final OrdemServico executar(OrdemServico os) {
         validarTransicao(os);
@@ -30,8 +33,8 @@ public abstract class OrdemServicoTemplate {
     }
 
     protected void notificar(OrdemServico os) {
-        System.out.println("[NOTIFICAÇÃO] OS " + os.getNumeroOs()
-            + " alterada para: " + os.getStatus().getDescricao());
+        LOGGER.log(Level.INFO, "[NOTIFICAÇÃO] OS {0} alterada para: {1}", 
+            new Object[]{os.getNumeroOs(), os.getStatus().getDescricao()});
     }
 
     protected abstract StatusOrdemServico proximoStatus(StatusOrdemServico atual);
@@ -49,8 +52,7 @@ public abstract class OrdemServicoTemplate {
             throw new NegocioException("OS finalizada não pode ser cancelada");
         }
         os.setStatus(StatusOrdemServico.CANCELADA);
-        System.out.println("[NOTIFICAÇÃO] OS " + os.getNumeroOs()
-            + " cancelada.");
+        LOGGER.log(Level.INFO, "[NOTIFICAÇÃO] OS {0} cancelada.", os.getNumeroOs());
     }
 
     public static void performPause(OrdemServico os) {
@@ -59,8 +61,7 @@ public abstract class OrdemServicoTemplate {
             throw new NegocioException("OS deve estar em Orçamento ou Execução para pausar");
         }
         os.setStatus(StatusOrdemServico.AGUARDANDO_PECA);
-        System.out.println("[NOTIFICAÇÃO] OS " + os.getNumeroOs()
-            + " pausada para aguardar peça.");
+        LOGGER.log(Level.INFO, "[NOTIFICAÇÃO] OS {0} pausada para aguardar peça.", os.getNumeroOs());
     }
 
     public static void performReturn(OrdemServico os) {
@@ -68,7 +69,6 @@ public abstract class OrdemServicoTemplate {
             throw new NegocioException("OS deve estar em Aguardando Peça para retornar");
         }
         os.setStatus(StatusOrdemServico.EM_ORCAMENTO);
-        System.out.println("[NOTIFICAÇÃO] OS " + os.getNumeroOs()
-            + " retornada para Orçamento.");
+        LOGGER.log(Level.INFO, "[NOTIFICAÇÃO] OS {0} retornada para Orçamento.", os.getNumeroOs());
     }
 }

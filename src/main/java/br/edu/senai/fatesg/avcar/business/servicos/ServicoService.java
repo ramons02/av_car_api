@@ -32,7 +32,7 @@ public class ServicoService extends GenericService<ServicoModel, ServicoDTO, ISe
     @Override
     public ServicoDTO salvar(ServicoModel model) {
         validation.validar(model);
-        return mapper.toDto(repository.salvar(model));
+        return executarComTratamentoDuplicidade(() -> mapper.toDto(repository.salvar(model)));
     }
 
     @Override
@@ -40,6 +40,6 @@ public class ServicoService extends GenericService<ServicoModel, ServicoDTO, ISe
         repository.buscarPorId(model.getId())
             .orElseThrow(() -> new EntidadeNaoEncontradaException("Serviço", model.getId()));
         validation.validar(model);
-        repository.atualizar(model);
+        executarComTratamentoDuplicidade(() -> repository.atualizar(model));
     }
 }

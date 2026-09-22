@@ -2,6 +2,16 @@ package br.edu.senai.fatesg.avcar.core.validations;
 
 import br.edu.senai.fatesg.avcar.core.exceptions.NegocioException;
 
+/**
+ * <b>Validador Genérico</b>
+ * <p>
+ * Aplica o princípio DRY (Don't Repeat Yourself) ao centralizar as regras de negócio
+ * e sanitização comuns (CPF, CNPJ, Placa, Telefones). Impede repetição de código
+ * de validação nos services das diversas entidades de negócio do sistema.
+ * </p>
+ * 
+ * @param <T> Tipo da entidade que será validada
+ */
 public abstract class GenericValidation<T> implements Validator<T> {
 
     @Override

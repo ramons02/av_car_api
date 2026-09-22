@@ -1,10 +1,9 @@
 package br.edu.senai.fatesg.avcar.business.ordemservico;
 
-// PADRÃO DECORATOR: Anexa responsabilidades adicionais a um objeto dinamicamente,
-// fornecendo uma alternativa flexível à herança para extensão de funcionalidade.
-// Aplicado aqui como classe base abstrata que envolve uma OrdemServico para
-// adicionar comportamentos extras (desconto, garantia etc.) sem modificar a
-// classe original — subclasses sobrescrevem apenas os métodos necessários.
+// PADRÃO DECORATOR: Atua como a classe base abstrata que envolve uma entidade OrdemServico real.
+// As subclasses (como os decoradores de Garantia ou Desconto) sobrescrevem apenas os métodos
+// pertinentes ao cálculo de valores para injetar regras adicionais no ciclo de vida da OS,
+// mantendo a interface original intacta e evitando dezenas de subclasses combinadas.
 public abstract class OrdemServicoDecorator extends OrdemServico {
     protected OrdemServico wrappee;
 

@@ -37,7 +37,7 @@ public class VeiculoService extends GenericService<VeiculoModel, VeiculoDTO, IVe
     @Override
     public VeiculoDTO salvar(VeiculoModel model) {
         validation.validar(model);
-        return mapper.toDto(repository.salvar(model));
+        return executarComTratamentoDuplicidade(() -> mapper.toDto(repository.salvar(model)));
     }
 
     @Override
@@ -45,7 +45,7 @@ public class VeiculoService extends GenericService<VeiculoModel, VeiculoDTO, IVe
         repository.buscarPorId(model.getId())
             .orElseThrow(() -> new EntidadeNaoEncontradaException("Veiculo", model.getId()));
         validation.validar(model);
-        repository.atualizar(model);
+        executarComTratamentoDuplicidade(() -> repository.atualizar(model));
     }
 
     @Override

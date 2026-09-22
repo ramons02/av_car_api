@@ -27,7 +27,7 @@ public class FornecedorRepositoryImpl extends AbstractRepository<FornecedorModel
         m.setCidadeFornecedor(rs.getString("cidadefornecedor"));
         m.setEstadoFornecedor(rs.getString("estadofornecedor"));
         m.setCepFornecedor(rs.getInt("cepfornecedor"));
-        m.setAtivo(true);
+        m.setAtivo(rs.getBoolean("ativo"));
         return m;
     };
 
@@ -49,7 +49,7 @@ public class FornecedorRepositoryImpl extends AbstractRepository<FornecedorModel
 
     @Override
     public List<FornecedorModel> listarTodos() {
-        return jdbc.query(getSelectSql() + " ORDER BY razaosocial", mapper);
+        return jdbc.query(getSelectSql() + " WHERE ativo = true ORDER BY razaosocial", mapper);
     }
 
     @Override
@@ -98,12 +98,12 @@ public class FornecedorRepositoryImpl extends AbstractRepository<FornecedorModel
 
     @Override
     public void deletar(Long id) {
-        jdbc.update("DELETE FROM fornecedor WHERE idfornecedor = ?", id);
+        jdbc.update("UPDATE fornecedor SET ativo = false WHERE idfornecedor = ?", id);
     }
 
     @Override
     public void toggleStatus(Long id) {
-        throw new UnsupportedOperationException("Toggle status não suportado para Fornecedor");
+        jdbc.update("UPDATE fornecedor SET ativo = NOT ativo WHERE idfornecedor = ?", id);
     }
 
     @Override

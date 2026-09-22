@@ -51,7 +51,7 @@ public class OrdemServicoRepositoryImpl implements IOrdemServicoRepository {
         os.setNumeroOs(rs.getInt("numeroos"));
         os.setVeiculo(veiculo);
         os.setEntradaVeiculo(rs.getDate("entradaveiculo") != null ? rs.getDate("entradaveiculo").toLocalDate() : null);
-        os.setDataAbertura(rs.getDate("dataabertura").toLocalDate());
+        os.setDataAbertura(rs.getTimestamp("dataabertura") != null ? rs.getTimestamp("dataabertura").toLocalDateTime() : null);
         if (rs.getTimestamp("datafechamento") != null)
             os.setDataFinalizacao(rs.getTimestamp("datafechamento").toLocalDateTime());
         os.setDefeitoRelatado(rs.getString("defeitorelatado"));
@@ -102,19 +102,19 @@ public class OrdemServicoRepositoryImpl implements IOrdemServicoRepository {
         if (os.getStatus() == null)
             os.setStatus(StatusOrdemServico.ABERTA);
         if (os.getDataAbertura() == null)
-            os.setDataAbertura(java.time.LocalDate.now());
+            os.setDataAbertura(java.time.LocalDateTime.now());
         Integer tempNumero = os.getNumeroOs() != null ? os.getNumeroOs() : 0;
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                "INSERT INTO ordemservico (numeroos, entradaveiculo, dataabertura, defeitorelatado, quantidadepecas, valortotalpecas, valormaodeobra, valorservicoexterno, valordesconto, valortotal, formadepagamento, garantia, status, idveiculo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO ordemservico (numeroos, entradaveiculo, dataabertura, defeitorelatado, quantidadepecas, valortotalpecas, valormaodeobra, valorservicoexterno, valordesconto, valortotal, formadepagamento, garantia, status, idveiculo, idcolaborador) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 new String[]{"idordemservico"});
             ps.setInt(1, tempNumero);
             if (os.getEntradaVeiculo() != null)
                 ps.setDate(2, java.sql.Date.valueOf(os.getEntradaVeiculo()));
             else
                 ps.setNull(2, Types.DATE);
-            ps.setDate(3, java.sql.Date.valueOf(os.getDataAbertura()));
+            ps.setTimestamp(3, java.sql.Timestamp.valueOf(os.getDataAbertura()));
             ps.setString(4, os.getDefeitoRelatado());
             ps.setInt(5, os.getQuantidadePecas());
             ps.setDouble(6, os.getValorTotalPecas());
@@ -126,6 +126,10 @@ public class OrdemServicoRepositoryImpl implements IOrdemServicoRepository {
             ps.setInt(12, os.getGarantia());
             ps.setString(13, os.getStatus().getRotulo());
             ps.setLong(14, os.getVeiculo().getId());
+            if (os.getColaboradorId() != null)
+                ps.setLong(15, os.getColaboradorId());
+            else
+                ps.setNull(15, Types.INTEGER);
             return ps;
         }, keyHolder);
         Long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
@@ -300,20 +304,21 @@ public class OrdemServicoRepositoryImpl implements IOrdemServicoRepository {
     }
 
     @Override
-    public ServicoExterno adicionarServicoExterno(Long osId, Long fornecedorId, String descricao,
-                                                   double valor, int garantiaDias) {
-        KeyHolder khSe = new GeneratedKeyHolder();
+    public ServicoExterno adicionarServicoExterno(Long osId, Long parceiroId, String descricao,
+                                                  double valor, int garantiaDias) {
+        // 1. Inserir em servicoexterno
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO servicoexterno (descricao, valor, prazo, garantiadias, idfornecedor) VALUES (?,?,CURRENT_DATE,?,?)",
+            var ps = con.prepareStatement(
+                "INSERT INTO servicoexterno (descricao, valor, prazo, garantiadias, idparceiro) VALUES (?,?,CURRENT_DATE,?,?)",
                 new String[]{"idservicoexterno"});
             ps.setString(1, descricao);
             ps.setDouble(2, valor);
             ps.setInt(3, garantiaDias);
-            ps.setLong(4, fornecedorId);
+            ps.setLong(4, parceiroId);
             return ps;
-        }, khSe);
-        Long seId = Objects.requireNonNull(khSe.getKey()).longValue();
+        }, keyHolder);
+        Long seId = Objects.requireNonNull(keyHolder.getKey()).longValue();
 
         KeyHolder kh = new GeneratedKeyHolder();
         jdbc.update(con -> {
@@ -329,8 +334,8 @@ public class OrdemServicoRepositoryImpl implements IOrdemServicoRepository {
             return ps;
         }, kh);
         Long id = Objects.requireNonNull(kh.getKey()).longValue();
-        Fornecedor f = new Fornecedor();
-        f.setId(fornecedorId);
+        br.edu.senai.fatesg.avcar.business.parceiros.ParceiroExterno f = new br.edu.senai.fatesg.avcar.business.parceiros.ParceiroExterno();
+        f.setId(parceiroId);
         return new ServicoExterno(id, null, f, descricao, valor, garantiaDias);
     }
 
@@ -342,18 +347,20 @@ public class OrdemServicoRepositoryImpl implements IOrdemServicoRepository {
     @Override
     public List<ServicoExterno> listarServicosExternos(Long osId) {
         return jdbc.query("""
-            SELECT ise.*, se.descricao as servico_descricao, f.razaosocial as fornecedor_nome
+            SELECT ise.*, se.descricao as servico_descricao, f.nome as parceiro_nome
             FROM itensservicoexterno ise
             JOIN servicoexterno se ON se.idservicoexterno = ise.idservicoexterno
-            JOIN fornecedor f ON f.idfornecedor = se.idfornecedor
+            JOIN parceiro_externo f ON f.id = se.idparceiro
             WHERE ise.idordemservico = ?
             ORDER BY ise.iditensservicoexterno
             """, (rs, row) -> {
-            Fornecedor f = new Fornecedor();
+            br.edu.senai.fatesg.avcar.business.parceiros.ParceiroExterno f = new br.edu.senai.fatesg.avcar.business.parceiros.ParceiroExterno();
             f.setId(rs.getLong("idservicoexterno"));
-            f.setRazaoSocial(rs.getString("fornecedor_nome"));
+            f.setNome(rs.getString("parceiro_nome"));
             return new ServicoExterno(rs.getLong("iditensservicoexterno"), null, f,
-                rs.getString("servico_descricao"), rs.getDouble("valorunitario"), rs.getInt("garantiadias"));
+                rs.getString("servico_descricao"),
+                rs.getDouble("valorunitario"),
+                rs.getInt("garantiadias"));
         }, osId);
     }
 }

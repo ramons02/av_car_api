@@ -33,7 +33,7 @@ public class ParceiroService extends GenericService<ParceiroModel, ParceiroDTO, 
     public ParceiroDTO salvar(ParceiroModel model) {
         if (!model.isAtivo()) model.setAtivo(true);
         validation.validar(model);
-        return mapper.toDto(repository.salvar(model));
+        return executarComTratamentoDuplicidade(() -> mapper.toDto(repository.salvar(model)));
     }
 
     @Override
@@ -41,6 +41,6 @@ public class ParceiroService extends GenericService<ParceiroModel, ParceiroDTO, 
         repository.buscarPorId(model.getId())
             .orElseThrow(() -> new EntidadeNaoEncontradaException("Parceiro", model.getId()));
         validation.validar(model);
-        repository.atualizar(model);
+        executarComTratamentoDuplicidade(() -> repository.atualizar(model));
     }
 }

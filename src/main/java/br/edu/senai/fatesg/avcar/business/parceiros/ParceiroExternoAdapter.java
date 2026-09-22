@@ -4,11 +4,9 @@ import br.edu.senai.fatesg.avcar.business.fornecedores.Fornecedor;
 import br.edu.senai.fatesg.avcar.business.servicos.Servico;
 import br.edu.senai.fatesg.avcar.business.servicos.ServicoExterno;
 
-// PADRÃO ADAPTER: Converte a interface de uma classe para outra interface
-// que o cliente espera encontrar, permitindo que classes incompatíveis
-// trabalhem juntas. Aplicado aqui para adaptar Fornecedor + ServicoExterno
-// (parceiro externo) à interface Servico, permitindo que serviços terceirizados
-// sejam tratados como serviços internos sem modificar o código consumidor.
+// PADRÃO ADAPTER: Adapta um Fornecedor e um ServicoExterno (parceria com terceiros) à interface
+// padrão de um Servico interno. Isso permite que a Ordem de Serviço trate os serviços
+// terceirizados da mesma forma que os serviços próprios, sem alterar o código que manipula a OS.
 public class ParceiroExternoAdapter extends Servico {
     private final Fornecedor fornecedor;
     private final ServicoExterno servicoExterno;

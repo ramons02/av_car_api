@@ -32,7 +32,7 @@ public class FornecedorService extends GenericService<FornecedorModel, Fornecedo
     @Override
     public FornecedorDTO salvar(FornecedorModel model) {
         validation.validar(model);
-        return mapper.toDto(repository.salvar(model));
+        return executarComTratamentoDuplicidade(() -> mapper.toDto(repository.salvar(model)));
     }
 
     @Override
@@ -40,6 +40,6 @@ public class FornecedorService extends GenericService<FornecedorModel, Fornecedo
         repository.buscarPorId(model.getId())
             .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor", model.getId()));
         validation.validar(model);
-        repository.atualizar(model);
+        executarComTratamentoDuplicidade(() -> repository.atualizar(model));
     }
 }

@@ -1,9 +1,9 @@
 package br.edu.senai.fatesg.avcar.business.clientes;
 
-// PADRÃO FACTORY METHOD: Define uma interface para criar objetos, mas permite
-// que subclasses decidam qual classe concreta instanciar. Aplicado aqui para
-// centralizar a criação de PessoaFisica ou PessoaJuridica conforme o tipo
-// recebido, isolando o código cliente da lógica de escolha e dos construtores.
+// PADRÃO FACTORY METHOD: Centraliza a criação de instâncias de PessoaFisica e
+// PessoaJuridica. O código cliente apenas fornece os dados necessários e o tipo desejado,
+// e a fábrica decide qual entidade concreta gerar, isolando e encapsulando a complexidade
+// dos construtores.
 public class ClienteFactory {
 
     private ClienteFactory() {}

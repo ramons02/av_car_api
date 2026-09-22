@@ -20,7 +20,7 @@ public class OrdemServico extends BaseModel {
     private Integer numeroOs;
     private Veiculo veiculo;
     private StatusOrdemServico status;
-    private LocalDate dataAbertura;
+    private LocalDateTime dataAbertura;
     private LocalDateTime dataFinalizacao;
     private LocalDate entradaVeiculo;
     private String defeitoRelatado;
@@ -32,6 +32,7 @@ public class OrdemServico extends BaseModel {
     private double valorDesconto;
     private double valorTotal;
     private int garantia;
+    private Long colaboradorId;
     private String colaboradorNome;
     private List<ItemServico> itensServico;
     private List<ItemPeca> itensPeca;
@@ -40,7 +41,7 @@ public class OrdemServico extends BaseModel {
         this.itensServico = new ArrayList<>();
         this.itensPeca = new ArrayList<>();
         this.status = StatusOrdemServico.ABERTA;
-        this.dataAbertura = LocalDate.now();
+        this.dataAbertura = LocalDateTime.now();
     }
 
     public OrdemServico(Long id, Integer numeroOs, Veiculo veiculo) {
@@ -48,7 +49,7 @@ public class OrdemServico extends BaseModel {
         this.numeroOs = numeroOs;
         this.veiculo = veiculo;
         this.status = StatusOrdemServico.ABERTA;
-        this.dataAbertura = LocalDate.now();
+        this.dataAbertura = LocalDateTime.now();
         this.itensServico = new ArrayList<>();
         this.itensPeca = new ArrayList<>();
     }
