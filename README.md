@@ -1,4 +1,4 @@
-# av_car-api — Backend (Biblioteca)
+# av_car-api: Backend (Biblioteca)
 
 Backend do **AV-CAR**: camada de regras de negócio e acesso a dados. Compila como **biblioteca** (`av-car-1.0.0.jar`) usada pelo frontend (`av_car_app`).
 
@@ -13,13 +13,13 @@ Separação clara entre visual e regras:
 | `datastructures/`| Algoritmos próprios: fila circular (FilaEsperaOS), busca binária, quicksort e cálculo de OS |
 | `helpers/`      | Formatação utilitária                                        |
 | `config/`       | Beans de infraestrutura (`JdbcTemplate`, conexão singleton)  |
-| `db/`           | Scripts SQL — `schema.sql` e `seed.sql`                      |
+| `db/`           | Scripts SQL: `schema.sql` e `seed.sql`                       |
 
 ## Destaques
 
 * **Ordem de Serviço**: fluxo de status (Aberta → Em andamento → Aguardando peça → Concluída → Entregue) com recálculo de peças, mão de obra e descontos.
 * **Repositories com JDBC** (sem JPA): `JdbcTemplate` + `RowMapper`.
-* **API REST** disponível via controllers (`ApiResponse` padronizada) — acessível na porta 8080.
+* **API REST** disponível via controllers (`ApiResponse` padronizada), acessível na porta 8080.
 
 ## Como compilar / instalar
 
@@ -38,11 +38,11 @@ O artefato `br.edu.senai.fatesg:av-car:1.0.0` é instalado no repositório local
 * **JDK 21** obrigatório (JDK 25 quebra a compilação do Lombok). No Windows: `set JAVA_HOME=C:\Program Files\Java\jdk-21`
 * **Maven Wrapper**: no Windows use `mvnw.cmd` em vez de `mvnw` nos comandos abaixo.
 * **PostgreSQL** rodando com o banco `avcar` criado.
-* Arquivo **`av_car_infra/.env`** com as credenciais do banco (ou variáveis de ambiente reais — sempre têm prioridade).
+* Arquivo **`av_car_infra/.env`** com as credenciais do banco (ou variáveis de ambiente reais, que sempre têm prioridade).
 
 ### Passo a passo
 
-**1. Preparar o banco** — o sistema não cria tabelas automaticamente. Execute em ordem no banco `avcar`:
+**1. Preparar o banco.** O sistema não cria tabelas automaticamente. Execute em ordem no banco `avcar`:
 
 ```bash
 # a partir de av_car_api/
@@ -66,7 +66,7 @@ mvnw clean package
 
 Gera o executável `target/av-car-app-1.0.0.jar`.
 
-**4. Executar a aplicação** — rode **a partir da pasta `av_car_app`** (o `springdotenv` localiza o `.env` por caminho relativo `../av_car_infra`):
+**4. Executar a aplicação.** Rode **a partir da pasta `av_car_app`** (o `springdotenv` localiza o `.env` por caminho relativo `../av_car_infra`):
 
 ```bash
 # av_car_app/
@@ -79,11 +79,11 @@ Ao iniciar: abre a **janela Swing** (tema FlatLaf) e a **API REST** fica dispon�
 
 O sistema **não** cria tabelas automaticamente. Configure o banco `avcar` no PostgreSQL e execute na ordem:
 
-1. `db/schema.sql` — criação das tabelas e relacionamentos
-2. `db/seed.sql` — massa de dados inicial
+1. `db/schema.sql` (criação das tabelas e relacionamentos)
+2. `db/seed.sql` (massa de dados inicial)
 
 As credenciais são definidas no `av_car_infra/.env`.
 
 ## Ambiente
 
-* **JDK:** 21 (obrigatório — o JDK 25 quebra a compilação do Lombok)
+* **JDK:** 21 (obrigatório; o JDK 25 quebra a compilação do Lombok)
